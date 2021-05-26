@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <string>
 #include "libArrays.h"
+#include "libFiles.h"
 
 struct Item
 {
@@ -14,9 +15,18 @@ struct Item
     int pricePerWeight{};
 };
 
-void KnapsackBacktracking(int i, int profit, int weight, bool include);
+struct Options {
+    int maxProfit{};
+    int maxWeight{};
+    int size{};
+    int* posInTree{};
+    Item* items = nullptr;
+    std::ofstream writeToFile;
+};
 
-bool Promising(int i, int weight, int profit);
+void KnapsackBacktracking(Options &opt, int i, int profit, int weight, bool include);
+
+bool Promising(Options &opt, int i, int weight, int profit);
 
 void Merge(Item*& arr, int left, int middle, int right);
 
@@ -26,6 +36,6 @@ void InitializePPW(Item* items, int size);
 
 void ShowItems(Item* items, int size);
 
-void KnapsackStart(Item*& i, int& s, int& maxW);
+void KnapsackStart(Item*& i, Options &opt);
 
 #endif // !LIBKNAPSACKBACKTRACKING_H

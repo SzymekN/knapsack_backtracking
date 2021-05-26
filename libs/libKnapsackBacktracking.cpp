@@ -1,10 +1,5 @@
 #include "libKnapsackBacktracking.h"
 
-int maxProfit{};
-int maxWeight{};
-int size{};
-int* posInTree{};
-Item* items = nullptr;
 
 
 void InitializePPW(Item* items, int size) {
@@ -21,81 +16,83 @@ void ShowItems(Item* items, int size) {
     }
 }
 
-void KnapsackStart(Item*& i, int& s, int& maxW) {
+void KnapsackStart(Item*& i, Options& opt) {
     if (i == nullptr)
         throw MyRuntimeExceptions::NullPtrException();
 
-    if (s < 1 or maxW < 1)
-        throw MyRuntimeExceptions::InputDataException();
+    CreateFile(opt.writeToFile, "results.txt");
 
-    items = i;
-    size = s;
-    maxWeight = maxW;
-    posInTree = CreateArray<int>(size);
-    memset(posInTree, 0, sizeof(int) * size);
+    opt.posInTree = CreateArray<int>(opt.size);
+    memset(opt.posInTree, 0, sizeof(int) * opt.size);
     //set -1 to set root to (0,0)
-    posInTree[0] = - 1;
+    opt.posInTree[0] = - 1;
     std::cout << std::setw(10) << "pos:" << std::setw(10) << "p:"
         << std::setw(10) << "w:" << std::setw(10) << "b:" << std::setw(10) << "mp:\n";
-    KnapsackBacktracking(0, 0, 0, false);
-    std::cout << maxProfit;
+    opt.writeToFile << std::setw(10) << "pos:" << std::setw(10) << "p:"
+        << std::setw(10) << "w:" << std::setw(10) << "b:" << std::setw(10) << "mp:\n";
+    KnapsackBacktracking(opt, 0, 0, 0, false);
+    std::cout << "\nMax profit: " << opt.maxProfit;
+    opt.writeToFile << "\nMax profit: " << opt.maxProfit;
 }
 
 
-bool Promising(int i, int weight, int profit)
+bool Promising(Options& opt, int i, int weight, int profit)
 {
     int k{ 0 };
     int totweight{ 0 };
     int bound{ 0 };
     std::string position{};
 
-    posInTree[i]++;
-    position = "( " + std::to_string(i) + ", " + std::to_string(posInTree[i]) + " )";
+    opt.posInTree[i]++;
+    position = "( " + std::to_string(i) + ", " + std::to_string(opt.posInTree[i]) + " )";
 
     std::cout << std::setw(10) << position << std::setw(10) << profit;
-    if (weight >= maxWeight) {
-        std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << maxProfit << "\n";
+    opt.writeToFile << std::setw(10) << position << std::setw(10) << profit;
+    if (weight >= opt.maxWeight) {
+        std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+        opt.writeToFile << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
         return false;
     }
     totweight = weight;
     bound = profit;
     k = i + 1;
 
-    while (totweight < maxWeight) {
-        if (totweight + items[k].weight > maxWeight)
+    while (totweight < opt.maxWeight) {
+        if (totweight + opt.items[k].weight > opt.maxWeight)
             break;
 
-        if (k >= size - 1)
+        if (k >= opt.size)
             break;
-        totweight += items[k].weight;
-        bound += items[k].price;
+        totweight += opt.items[k].weight;
+        bound += opt.items[k].price;
         k++;
     }
 
-    if (k < size)
-        bound += (maxWeight - totweight) * items[k].pricePerWeight;
+    if (k < opt.size)
+        bound += (opt.maxWeight - totweight) * opt.items[k].pricePerWeight;
 
 
-    std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << maxProfit << "\n";
-    if (bound <= maxProfit)
+    std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+    opt.writeToFile<< std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+    if (bound <= opt.maxProfit)
         return false;
 
     return true;
 }
-void KnapsackBacktracking(int i, int profit, int weight, bool include)
+void KnapsackBacktracking(Options& opt, int i, int profit, int weight, bool include)
 {
     if (include) {
-        profit += items[i].price;
-        weight += items[i].weight;
+        profit += opt.items[i].price;
+        weight += opt.items[i].weight;
     }
 
-    if (weight <= maxWeight && profit > maxProfit)
-        maxProfit = profit;
+    if (weight <= opt.maxWeight && profit > opt.maxProfit)
+        opt.maxProfit = profit;
 
 
-    if (i < size and Promising(i, weight, profit)) {
-        KnapsackBacktracking(i + 1, profit, weight, true);
-        KnapsackBacktracking(i + 1, profit, weight, false);
+    if (i < opt.size and Promising(opt,i, weight, profit)) {
+        KnapsackBacktracking(opt, i + 1, profit, weight, true);
+        KnapsackBacktracking(opt, i + 1, profit, weight, false);
     }
 
 }

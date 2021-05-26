@@ -9,6 +9,7 @@ int main()
 	std::ifstream readFromFile;
 	int size{};
 	int maxWeight{};
+	Options options;
 
 	try {
 		OpenFile(readFromFile, "in.txt");
@@ -17,8 +18,11 @@ int main()
 
 		if (size < 1 or maxWeight < 1)
 			throw MyRuntimeExceptions::InputDataException();
-
+		
 		size++;
+		options.size = size;
+		options.maxWeight = maxWeight;
+
 		Item* items = new Item[size];
 		if (items == nullptr)
 			throw MyRuntimeExceptions::NullPtrException();
@@ -41,8 +45,9 @@ int main()
 		//InitializePPW(items, size);
 		//ShowItems(items, size);
 		MergeSort(items, 1, size - 1);
-		//ShowItems(items, size);
-		KnapsackStart(items, size, maxWeight);
+		options.items = items;
+		//ShowItems(options.items, size);
+		KnapsackStart(items, options);
 	}
 	catch (std::exception& err) {
 		returnCode = -1;
