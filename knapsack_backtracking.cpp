@@ -1,10 +1,12 @@
-﻿#include<exception>
+﻿#include <locale.h>
 #include "libs/libKnapsackBacktracking.h"
 #include "libs/libFiles.h"
 
 
 int main()
 {
+	setlocale(LC_ALL, "Polish");
+
 	int returnCode{};
 	std::ifstream readFromFile;
 	int size{};
@@ -20,8 +22,6 @@ int main()
 			throw MyRuntimeExceptions::InputDataException();
 		
 		size++;
-		options.size = size;
-		options.maxWeight = maxWeight;
 
 		Item* items = new Item[size];
 		if (items == nullptr)
@@ -42,12 +42,20 @@ int main()
 			items[i].pricePerWeight = pw;
 		}
 
-		//InitializePPW(items, size);
-		//ShowItems(items, size);
 		MergeSort(items, 1, size - 1);
+
+		options.size = size;
+		options.maxWeight = maxWeight;
 		options.items = items;
-		//ShowItems(options.items, size);
-		KnapsackStart(items, options);
+		options.posInTree = CreateArray<int>(options.size);
+		CreateFile(options.writeToFile, "results.txt");
+		memset(options.posInTree, 0, sizeof(int) * options.size);
+		options.posInTree[0] = -1;
+
+		KnapsackBacktracking(options, 0, 0, 0, true);
+		std::cout << "\nMax profit: " << options.maxProfit;
+		options.writeToFile << "\nMax profit: " << options.maxProfit;
+
 	}
 	catch (std::exception& err) {
 		returnCode = -1;

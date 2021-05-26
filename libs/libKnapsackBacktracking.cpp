@@ -16,41 +16,20 @@ void ShowItems(Item* items, int size) {
     }
 }
 
-void KnapsackStart(Item*& i, Options& opt) {
-    if (i == nullptr)
-        throw MyRuntimeExceptions::NullPtrException();
-
-    CreateFile(opt.writeToFile, "results.txt");
-
-    opt.posInTree = CreateArray<int>(opt.size);
-    memset(opt.posInTree, 0, sizeof(int) * opt.size);
-    //set -1 to set root to (0,0)
-    opt.posInTree[0] = - 1;
-    std::cout << std::setw(10) << "pos:" << std::setw(10) << "p:"
-        << std::setw(10) << "w:" << std::setw(10) << "b:" << std::setw(10) << "mp:\n";
-    opt.writeToFile << std::setw(10) << "pos:" << std::setw(10) << "p:"
-        << std::setw(10) << "w:" << std::setw(10) << "b:" << std::setw(10) << "mp:\n";
-    KnapsackBacktracking(opt, 0, 0, 0, false);
-    std::cout << "\nMax profit: " << opt.maxProfit;
-    opt.writeToFile << "\nMax profit: " << opt.maxProfit;
-}
-
-
 bool Promising(Options& opt, int i, int weight, int profit)
 {
     int k{ 0 };
     int totweight{ 0 };
     int bound{ 0 };
-    std::string position{};
 
-    opt.posInTree[i]++;
-    position = "( " + std::to_string(i) + ", " + std::to_string(opt.posInTree[i]) + " )";
 
-    std::cout << std::setw(10) << position << std::setw(10) << profit;
-    opt.writeToFile << std::setw(10) << position << std::setw(10) << profit;
+    //std::cout << std::setw(10) << position << std::setw(10) << profit;
+    //opt.writeToFile << std::setw(10) << position << std::setw(10) << profit;
     if (weight >= opt.maxWeight) {
-        std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
-        opt.writeToFile << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+        //std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+        //opt.writeToFile << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+        std::cout << "Do³o¿enie przedmiotu przekracza wagê maksymaln¹ - Wêze³ nieobiecuj¹cy\n";
+        opt.writeToFile << "Do³o¿enie przedmiotu przekracza wagê maksymaln¹ - Wêze³ nieobiecuj¹cy\n";
         return false;
     }
     totweight = weight;
@@ -70,24 +49,44 @@ bool Promising(Options& opt, int i, int weight, int profit)
 
     if (k < opt.size)
         bound += (opt.maxWeight - totweight) * opt.items[k].pricePerWeight;
+    std::cout << "Wyznaczam K. K = " << k << "\n";
+    std::cout << "Wyznaczam granicê. Bound = " << bound << "\n";
+    opt.writeToFile << "Wyznaczam K. K = " << k << "\n";
+    opt.writeToFile << "Wyznaczam granicê. Bound = " << bound << "\n";
 
-
-    std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
-    opt.writeToFile<< std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
-    if (bound <= opt.maxProfit)
+    //std::cout << std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+    //opt.writeToFile<< std::setw(10) << weight << std::setw(10) << bound << std::setw(10) << opt.maxProfit << "\n";
+    if (bound <= opt.maxProfit) {
+        std::cout << "Granica mniejsza b¹dŸ równa maksymalnemu zyskowi - Wêzê³ nieobiecuj¹cy\n";
+        opt.writeToFile << "Granica mniejsza b¹dŸ równa maksymalnemu zyskowi - Wêzê³ nieobiecuj¹cy\n";
         return false;
+    }
 
     return true;
 }
 void KnapsackBacktracking(Options& opt, int i, int profit, int weight, bool include)
 {
+    std::string position{};
+
+    opt.posInTree[i]++;
+    position = "( " + std::to_string(i) + ", " + std::to_string(opt.posInTree[i]) + " )";
+    std::cout << "\nPrzechodzê do wierzcho³ka " << position << "\n";
+    opt.writeToFile << "\nPrzechodzê do wierzcho³ka " << position << "\n";
+
     if (include) {
         profit += opt.items[i].price;
         weight += opt.items[i].weight;
+        std::cout << "Obliczam nowy zysk. Profit = " << profit << "\n";
+        std::cout << "Obliczam now¹ wagê. Weight = " << weight << "\n";
+        opt.writeToFile << "Obliczam nowy zysk. Profit = " << profit << "\n";
+        opt.writeToFile << "Obliczam now¹ wagê. Weight = " << weight << "\n";
     }
 
-    if (weight <= opt.maxWeight && profit > opt.maxProfit)
+    if (weight <= opt.maxWeight && profit > opt.maxProfit) {
         opt.maxProfit = profit;
+        std::cout << "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
+        opt.writeToFile<< "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
+    }
 
 
     if (i < opt.size and Promising(opt,i, weight, profit)) {

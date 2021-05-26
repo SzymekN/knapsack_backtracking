@@ -36,6 +36,4 @@ void InitializePPW(Item* items, int size);
 
 void ShowItems(Item* items, int size);
 
-void KnapsackStart(Item*& i, Options &opt);
-
 #endif // !LIBKNAPSACKBACKTRACKING_H
