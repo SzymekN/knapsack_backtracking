@@ -15,6 +15,41 @@ void ShowItems(Item* items, int size) {
             << "\n";
     }
 }
+void KnapsackBacktracking(Options& opt, int i, int profit, int weight, bool include)
+{
+    std::string position{};
+
+    opt.posInTree[i]++;
+    //prepare information about node position
+    position = "( " + std::to_string(i) + ", " + std::to_string(opt.posInTree[i]) + " )";
+    std::cout << "\nPrzechodzê do wierzcho³ka " << position << "\n";
+    opt.writeToFile << "\nPrzechodzê do wierzcho³ka " << position << "\n";
+
+    //if item shoud be included
+    if (include) {
+        profit += opt.items[i].price;
+        weight += opt.items[i].weight;
+        std::cout << "Obliczam nowy zysk. Profit = " << profit << "\n";
+        std::cout << "Obliczam now¹ wagê. Weight = " << weight << "\n";
+        opt.writeToFile << "Obliczam nowy zysk. Profit = " << profit << "\n";
+        opt.writeToFile << "Obliczam now¹ wagê. Weight = " << weight << "\n";
+    }
+
+    if (weight <= opt.maxWeight && profit > opt.maxProfit) {
+        opt.maxProfit = profit;
+        std::cout << "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
+        opt.writeToFile << "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
+    }
+
+
+    if (i < opt.size and Promising(opt, i, weight, profit)) {
+        //left node
+        KnapsackBacktracking(opt, i + 1, profit, weight, true);
+        //right node
+        KnapsackBacktracking(opt, i + 1, profit, weight, false);
+    }
+
+}
 
 bool Promising(Options& opt, int i, int weight, int profit)
 {
@@ -36,6 +71,7 @@ bool Promising(Options& opt, int i, int weight, int profit)
     bound = profit;
     k = i + 1;
 
+    //sum total weight and bound, set k
     while (totweight < opt.maxWeight) {
         if (totweight + opt.items[k].weight > opt.maxWeight)
             break;
@@ -47,6 +83,7 @@ bool Promising(Options& opt, int i, int weight, int profit)
         k++;
     }
 
+    //if weight exceeded and not all items packed add to bound
     if (k < opt.size)
         bound += (opt.maxWeight - totweight) * opt.items[k].pricePerWeight;
     std::cout << "Wyznaczam K. K = " << k << "\n";
@@ -63,37 +100,6 @@ bool Promising(Options& opt, int i, int weight, int profit)
     }
 
     return true;
-}
-void KnapsackBacktracking(Options& opt, int i, int profit, int weight, bool include)
-{
-    std::string position{};
-
-    opt.posInTree[i]++;
-    position = "( " + std::to_string(i) + ", " + std::to_string(opt.posInTree[i]) + " )";
-    std::cout << "\nPrzechodzê do wierzcho³ka " << position << "\n";
-    opt.writeToFile << "\nPrzechodzê do wierzcho³ka " << position << "\n";
-
-    if (include) {
-        profit += opt.items[i].price;
-        weight += opt.items[i].weight;
-        std::cout << "Obliczam nowy zysk. Profit = " << profit << "\n";
-        std::cout << "Obliczam now¹ wagê. Weight = " << weight << "\n";
-        opt.writeToFile << "Obliczam nowy zysk. Profit = " << profit << "\n";
-        opt.writeToFile << "Obliczam now¹ wagê. Weight = " << weight << "\n";
-    }
-
-    if (weight <= opt.maxWeight && profit > opt.maxProfit) {
-        opt.maxProfit = profit;
-        std::cout << "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
-        opt.writeToFile<< "Przedmiot mieœci siê w plecaku oraz zysk jest wiêkszy. Max profit = " << opt.maxProfit << "\n";
-    }
-
-
-    if (i < opt.size and Promising(opt,i, weight, profit)) {
-        KnapsackBacktracking(opt, i + 1, profit, weight, true);
-        KnapsackBacktracking(opt, i + 1, profit, weight, false);
-    }
-
 }
 
 void Merge(Item*& arr, int left, int middle, int right)
